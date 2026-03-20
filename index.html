@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evaluación de Servicio — Samplia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:       #E8192C;
+      --red-dark:  #cb4a5f;
+      --red-pale:  #f1d8de;
+      --white:     #FFFFFF;
+      --off-white: #FAFAFA;
+      --g50:       #F5F5F5;
+      --g100:      #EBEBEB;
+      --g300:      #C8C8C8;
+      --g500:      #8A8A8A;
+      --g700:      #404040;
+      --black:     #111111;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Poppins', sans-serif; background: var(--white); color: var(--black); overflow-x: hidden; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: var(--white); border-bottom: 1px solid var(--g100);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 60px;
+    }
+    .nav-logo { display: flex; align-items: center; }
+    .nav-badge {
+      font-size: .72rem; font-weight: 500; color: var(--g500);
+      background: var(--g50); border: 1px solid var(--g100);
+      border-radius: 100px; padding: 4px 12px;
+    }
+
+    /* ── HERO ── */
+    .hero { padding: 130px 24px 80px; text-align: center; position: relative; overflow: hidden; }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: linear-gradient(155deg, #fff 0%, #fff 50%, #FFF0F1 100%);
+    }
+    .hero-bg::before {
+      content: ''; position: absolute; right: -100px; top: -100px;
+      width: 450px; height: 450px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,25,44,.08) 0%, transparent 70%);
+    }
+    .hero-inner { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; }
+
+    .chip {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--red); color: white;
+      font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      padding: 6px 14px; border-radius: 100px; margin-bottom: 28px;
+      opacity: 0; animation: up .45s .05s ease forwards;
+    }
+    .chip-dot { width: 6px; height: 6px; background: rgba(255,255,255,.5); border-radius: 50%; }
+
+    h1 {
+      font-size: clamp(2.2rem, 5vw, 4rem); font-weight: 800; line-height: 1.1;
+      letter-spacing: -.03em; color: var(--black); margin-bottom: 18px;
+      opacity: 0; animation: up .45s .12s ease forwards;
+    }
+    h1 .r { color: var(--red); }
+
+    .hero-p {
+      font-size: .95rem; font-weight: 300; color: var(--g500); line-height: 1.7;
+      max-width: 420px; margin: 0 auto 42px;
+      opacity: 0; animation: up .45s .2s ease forwards;
+    }
+
+    .hero-btn {
+      display: inline-flex; align-items: center; gap: 9px;
+      background: var(--red); color: white;
+      font-family: 'Poppins', sans-serif; font-size: .88rem; font-weight: 600;
+      padding: 14px 28px; border-radius: 12px;
+      text-decoration: none; border: none; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(232,25,44,.3);
+      transition: background .15s, transform .15s, box-shadow .15s;
+      opacity: 0; animation: up .45s .28s ease forwards;
+    }
+    .hero-btn:hover { background: var(--red-dark); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(232,25,44,.4); }
+
+    .stats {
+      display: flex; justify-content: center; margin-top: 52px;
+      border-top: 1px solid var(--g100); padding-top: 36px;
+      opacity: 0; animation: up .45s .36s ease forwards;
+    }
+    .stat { flex: 1; max-width: 150px; text-align: center; padding: 0 16px; position: relative; }
+    .stat:not(:last-child)::after { content: ''; position: absolute; right: 0; top: 10%; bottom: 10%; width: 1px; background: var(--g100); }
+    .stat-n { font-size: 1.5rem; font-weight: 800; color: var(--red); letter-spacing: -.03em; }
+    .stat-l { font-size: .7rem; font-weight: 400; color: var(--g500); margin-top: 3px; }
+
+    /* ── FORM SECTION ── */
+    .form-wrap { max-width: 640px; margin: 0 auto; padding: 0 24px 100px; }
+    .sec-tag { font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--red); text-align: center; margin-bottom: 10px; }
+    .sec-title { font-size: clamp(1.5rem, 3.5vw, 2rem); font-weight: 700; letter-spacing: -.02em; text-align: center; margin-bottom: 32px; color: var(--black); }
+
+    .card { background: var(--white); border: 1px solid var(--g100); border-radius: 20px; padding: 34px; box-shadow: 0 4px 16px rgba(0,0,0,.07); }
+
+    /* Progress */
+    .prog-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .prog-lbl { font-size: .68rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g500); }
+    .prog-pct { font-size: .68rem; font-weight: 700; color: var(--red); }
+    .prog-track { height: 3px; background: var(--g100); border-radius: 100px; margin-bottom: 28px; overflow: hidden; }
+    .prog-fill { height: 100%; background: var(--red); transition: width .4s cubic-bezier(.4,0,.2,1); width: 0; }
+
+    /* Steps */
+    .step { display: none; animation: up .3s ease; }
+    .step.active { display: block; }
+
+    /* Fields */
+    .field { margin-bottom: 20px; }
+    .field label {
+      display: flex; align-items: center; gap: 5px;
+      font-size: .8rem; font-weight: 600; color: var(--g700); margin-bottom: 8px;
+    }
+    .opt { font-size: .68rem; color: var(--g300); font-weight: 400; letter-spacing: .01em; }
+
+    .field input[type="text"],
+    .field textarea {
+      width: 100%; padding: 11px 13px;
+      border: 1.5px solid var(--g100); border-radius: 10px;
+      font-family: 'Poppins', sans-serif; font-size: .82rem; color: var(--black);
+      background: var(--off-white); outline: none;
+      transition: border-color .15s, background .15s; resize: none;
+    }
+    .field input:focus, .field textarea:focus { border-color: var(--red); background: var(--white); }
+    .field textarea { height: 90px; line-height: 1.6; }
+
+    .err { font-size: .7rem; color: var(--red); margin-top: 5px; display: none; font-weight: 500; }
+    .hint { font-size: .7rem; color: var(--g300); margin-top: 5px; font-weight: 400; }
+
+    .divider { height: 1px; background: var(--g100); margin: 22px 0; }
+    .matrix-wrap { overflow-x: auto; }
+    .matrix {
+      width: 100%; border-collapse: collapse; min-width: 400px;
+    }
+    .matrix thead th {
+      font-size: .68rem; font-weight: 600; color: var(--g500);
+      padding: 8px 10px; text-align: center; border-bottom: 1px solid var(--g100);
+      line-height: 1.35;
+    }
+    .matrix thead th:first-child { text-align: left; min-width: 140px; }
+    .matrix tbody tr { border-bottom: 1px solid var(--g100); }
+    .matrix tbody tr:last-child { border-bottom: none; }
+    .matrix tbody td {
+      padding: 12px 10px; font-size: .78rem; font-weight: 400; color: var(--g700);
+      line-height: 1.45;
+    }
+    .matrix tbody td:first-child { text-align: left; }
+    .matrix tbody td:not(:first-child) { text-align: center; }
+    .matrix tbody tr:hover { background: var(--g50); }
+
+    /* custom radio */
+    .radio-circle {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 1.5px solid var(--g300); background: var(--white);
+      cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+      transition: all .15s; flex-shrink: 0;
+    }
+    .radio-circle.checked { border-color: var(--red); background: var(--red); }
+    .radio-circle.checked::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: white; }
+    .radio-circle:hover:not(.checked) { border-color: var(--red); background: var(--red-pale); }
+
+    /* ── SLIDER (satisfacción y NPS) ── */
+    .slider-wrap { padding: 8px 4px 4px; }
+
+    .slider-display {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .slider-val {
+      font-size: 2rem; font-weight: 800; color: var(--red);
+      letter-spacing: -.03em; line-height: 1; min-width: 40px;
+    }
+    .slider-val span { font-size: .75rem; font-weight: 500; color: var(--g300); margin-left: 2px; }
+    .slider-emoji { font-size: 1.6rem; transition: all .2s; }
+
+    .slider-track-wrap { position: relative; height: 10px; margin-bottom: 10px; }
+    .slider-track {
+      position: absolute; inset: 0;
+      background: var(--g100); border-radius: 100px; overflow: hidden;
+    }
+    .slider-fill {
+      height: 100%; background: linear-gradient(90deg, var(--red-pale), var(--red));
+      border-radius: 100px; transition: width .15s ease; width: 0%;
+    }
+
+    input[type="range"].styled-slider {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      -webkit-appearance: none; appearance: none;
+      background: transparent; cursor: pointer; margin: 0;
+      z-index: 2;
+    }
+    input[type="range"].styled-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--white); border: 2.5px solid var(--red);
+      box-shadow: 0 2px 8px rgba(232,25,44,.25);
+      margin-top: -6px; transition: box-shadow .15s, transform .15s;
+    }
+    input[type="range"].styled-slider::-moz-range-thumb {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--white); border: 2.5px solid var(--red);
+      box-shadow: 0 2px 8px rgba(232,25,44,.25);
+      cursor: pointer;
+    }
+    input[type="range"].styled-slider:focus { outline: none; }
+    input[type="range"].styled-slider:hover::-webkit-slider-thumb,
+    input[type="range"].styled-slider:active::-webkit-slider-thumb {
+      box-shadow: 0 0 0 5px rgba(232,25,44,.12);
+      transform: scale(1.1);
+    }
+
+    .slider-labels { display: flex; justify-content: space-between; }
+    .slider-labels span { font-size: .68rem; color: var(--g300); font-weight: 500; }
+
+    .slider-start-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 18px; border: 1.5px solid var(--g100); border-radius: 100px;
+      background: var(--g50); font-family: 'Poppins', sans-serif;
+      font-size: .76rem; font-weight: 600; color: var(--g500);
+      cursor: pointer; transition: all .15s; white-space: nowrap;
+    }
+    .slider-start-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-pale); }
+    .slider-start-btn.hidden { display: none; }
+
+    .hint-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 4px; flex-wrap: wrap;
+    }
+    .hint-row .hint { margin-bottom: 0; }
+
+    .divider { height: 1px; background: var(--g100); margin: 22px 0; }
+
+    .q-label {
+      font-size: .82rem; font-weight: 600; color: var(--g700); margin-bottom: 14px; line-height: 1.5;
+      display: flex; gap: 4px; align-items: flex-start;
+    }
+
+    /* Buttons */
+    .btn-row { display: flex; gap: 10px; margin-top: 28px; }
+    .btn-back {
+      padding: 11px 18px; border: 1.5px solid var(--g100); border-radius: 10px;
+      background: none; font-family: 'Poppins', sans-serif; font-size: .8rem; font-weight: 600;
+      color: var(--g500); cursor: pointer; transition: all .15s;
+    }
+    .btn-back:hover { border-color: var(--g300); color: var(--g700); }
+    .btn-next {
+      flex: 1; padding: 13px 22px; background: var(--red); border: none; border-radius: 10px;
+      font-family: 'Poppins', sans-serif; font-size: .86rem; font-weight: 700; color: white; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(232,25,44,.25);
+      transition: background .15s, transform .15s, box-shadow .15s;
+    }
+    .btn-next:hover { background: var(--red-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232,25,44,.35); }
+    .btn-next:disabled { background: var(--g100); color: var(--g300); box-shadow: none; transform: none; cursor: not-allowed; }
+
+    /* Resumen */
+    .res-box { background: var(--g50); border: 1px solid var(--g100); border-radius: 12px; padding: 16px 18px; margin-bottom: 18px; }
+    .res-row { display: flex; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--g100); align-items: flex-start; }
+    .res-row:last-child { border-bottom: none; }
+    .res-k { font-size: .7rem; color: var(--g500); font-weight: 500; min-width: 140px; line-height: 1.4; }
+    .res-v { font-size: .78rem; font-weight: 600; line-height: 1.4; }
+    .res-section {
+      font-size: .65rem; font-weight: 700; color: var(--red); letter-spacing: .08em;
+      text-transform: uppercase; padding: 10px 0 4px; display: block;
+    }
+
+    /* Loader */
+    .loader { display: none; align-items: center; justify-content: center; gap: 9px; font-size: .78rem; color: var(--g500); padding: 7px 0; }
+    .spinner { width: 15px; height: 15px; border: 2px solid var(--g100); border-top-color: var(--red); border-radius: 50%; animation: spin .7s linear infinite; }
+
+    /* Success */
+    .success { display: none; text-align: center; padding: 10px 0 4px; animation: up .35s ease; }
+    .s-icon { width: 60px; height: 60px; background: var(--red-pale); border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
+    .s-icon svg { width: 26px; height: 26px; color: var(--red); }
+    .s-title { font-size: 1.4rem; font-weight: 800; letter-spacing: -.02em; margin-bottom: 10px; }
+    .s-sub { font-size: .88rem; font-weight: 300; color: var(--g500); line-height: 1.7; max-width: 320px; margin: 0 auto 26px; }
+    .btn-reset {
+      display: inline-flex; align-items: center; gap: 7px; padding: 10px 20px;
+      border: 1.5px solid var(--g100); border-radius: 10px; background: none;
+      font-family: 'Poppins', sans-serif; font-size: .78rem; font-weight: 600; color: var(--g500); cursor: pointer; transition: all .15s;
+    }
+    .btn-reset:hover { border-color: var(--red); color: var(--red); background: var(--red-pale); }
+
+    @keyframes up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 540px) {
+      nav { padding: 0 18px; }
+      .card, .setup-card, .code-card { padding: 22px 16px; }
+      .matrix { min-width: 360px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <img src="https://samplia.com/assets/img/Samplia.svg" alt="Samplia" style="height:28px;width:auto;display:block;" />
+  </div>
+  <span class="nav-badge">Samplia Insights</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-inner">
+    <div class="chip"><span class="chip-dot"></span>Evaluación de Satisfacción</div>
+    <h1>Tu opinión<br>hace la <span class="r">diferencia</span></h1>
+    <p class="hero-p">Compártenos tu experiencia con nuestro equipo.<br>Cada respuesta nos ayuda a mejorar nuestros servicios.</p>
+    <a href="#form" class="hero-btn">
+      Comenzar evaluación
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <div class="stats">
+      <div class="stat"><div class="stat-n">7</div><div class="stat-l">Preguntas</div></div>
+      <div class="stat"><div class="stat-n">3 min</div><div class="stat-l">Tiempo estimado</div></div>
+      <div class="stat"><div class="stat-n">100%</div><div class="stat-l">Confidencial</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FORM -->
+<section class="form-wrap" id="form">
+  <div style="height:1.5em;"></div>
+  <div class="sec-tag">Formulario</div>
+  <h2 class="sec-title">Evalúa tu experiencia</h2>
+
+  <div class="card">
+    <div class="prog-head">
+      <span class="prog-lbl" id="stepLbl">Paso 1 de 4</span>
+      <span class="prog-pct" id="pct">0%</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="pFill"></div></div>
+
+    <!-- ══ STEP 1 — Datos del evaluador ══ -->
+    <div class="step active" id="step1">
+      <div class="field">
+        <label>Nombre y apellido <span class="opt">opcional</span></label>
+        <input type="text" id="nombre" placeholder="Ej. María López" />
+        <div class="err" id="nombreErr">⚠️ Por favor completa este campo.</div>
+      </div>
+      <div class="field">
+        <label>Organización / Empresa</label>
+        <input type="text" id="empresa" placeholder="Ej. Samplia Media" />
+        <div class="err" id="empresaErr">⚠️ Por favor completa este campo.</div>
+      </div>
+      <div class="field">
+        <label>Proyecto o campaña evaluada</label>
+        <input type="text" id="proyecto" placeholder="Ej. Entrega de muestras para el lanzamiento de producto X" />
+        <div class="err" id="proyectoErr">⚠️ Por favor completa este campo.</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Satisfacción general 1-10 -->
+      <div class="field">
+        <div class="q-label">
+          En general, ¿qué tan satisfecha/o está con el servicio prestado por Samplia a su empresa?
+        </div>
+        <div class="hint-row">
+          <span class="hint">Desliza el indicador del 1 (Muy insatisfecho) al 10 (Muy satisfecho)</span>
+          <button class="slider-start-btn" id="satStartBtn" onclick="activateSlider('sat')">Toca para calificar</button>
+        </div>
+        <div style="height:14px;"></div>
+        <div class="slider-wrap">
+          <div class="slider-display">
+            <div class="slider-val" id="satDisplay">—<span>/10</span></div>
+            <div class="slider-emoji" id="satEmoji">🤔</div>
+          </div>
+          <div class="slider-track-wrap">
+            <div class="slider-track"><div class="slider-fill" id="satFill"></div></div>
+            <input type="range" class="styled-slider" id="satSlider" min="1" max="10" step="1" value="10"
+              oninput="onSat(this.value)" style="display:none;" />
+          </div>
+          <div class="slider-labels"><span>1 — Muy insatisfecho</span><span>10 — Muy satisfecho</span></div>
+        </div>
+        <div class="err" id="satErr">⚠️ Por favor selecciona un valor.</div>
+      </div>
+
+      <div class="btn-row">
+        <div></div>
+        <button class="btn-next" onclick="gn(1)">Continuar →</button>
+      </div>
+    </div>
+
+    <!-- ══ STEP 2 — Evaluación del servicio (matrix 1-5) ══ -->
+    <div class="step" id="step2">
+      <div class="q-label">
+        Por favor, evalúe los siguientes aspectos del servicio:
+      </div>
+      <div class="hint" style="margin-bottom:14px;">Selecciona de Deficiente a Excelente para cada aspecto</div>
+      <div class="matrix-wrap">
+        <table class="matrix" id="matrizServicio">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Deficiente</th>
+              <th>Pobre</th>
+              <th>Aceptable</th>
+              <th>Bueno</th>
+              <th>Excelente</th>
+              <th>No aplica</th>
+            </tr>
+          </thead>
+          <tbody id="matrizServicioBody"></tbody>
+        </table>
+      </div>
+      <div class="err" id="matrizServicioErr">⚠️ Por favor califica todos los aspectos.</div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="gb(2)">← Atrás</button>
+        <button class="btn-next" onclick="gn(2)">Continuar →</button>
+      </div>
+    </div>
+
+    <!-- ══ STEP 3 — Impacto en negocio (matrix) + NPS + Fricción ══ -->
+    <div class="step" id="step3">
+      <div class="q-label">
+        ¿En qué medida considera que la(s) activación(es) con Samplia ha(n) impactado en el posicionamiento o los objetivos de negocio de su marca?
+      </div>
+      <div class="hint" style="margin-bottom:14px;">Selecciona el nivel de impacto para cada dimensión</div>
+      <div class="matrix-wrap">
+        <table class="matrix" id="matrizImpacto">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Nulo</th>
+              <th>Bajo</th>
+              <th>Moderado</th>
+              <th>Alto</th>
+              <th>Excepcional</th>
+            </tr>
+          </thead>
+          <tbody id="matrizImpactoBody"></tbody>
+        </table>
+      </div>
+      <div class="err" id="matrizImpactoErr">⚠️ Por favor califica todos los aspectos.</div>
+
+      <div class="divider"></div>
+
+      <!-- NPS 0-10 -->
+      <div class="field">
+        <div class="q-label">
+          ¿Qué tan probable es que recomiende a Samplia Media como partner estratégico a otros colegas del sector?
+        </div>
+        <div class="hint-row">
+          <span class="hint">Desliza el indicador del 0 (Nada probable) al 10 (Muy probable)</span>
+          <button class="slider-start-btn" id="npsStartBtn" onclick="activateSlider('nps')">Toca para calificar</button>
+        </div>
+        <div style="height:14px;"></div>
+        <div class="slider-wrap">
+          <div class="slider-display">
+            <div class="slider-val" id="npsDisplay">—<span>/10</span></div>
+            <div class="slider-emoji" id="npsEmoji">🤔</div>
+          </div>
+          <div class="slider-track-wrap">
+            <div class="slider-track"><div class="slider-fill" id="npsFill"></div></div>
+            <input type="range" class="styled-slider" id="npsSlider" min="0" max="10" step="1" value="10"
+              oninput="onNps(this.value)" style="display:none;" />
+          </div>
+          <div class="slider-labels"><span>0 — Nada probable</span><span>10 — Muy probable</span></div>
+        </div>
+        <div class="err" id="npsErr">⚠️ Por favor selecciona un valor.</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="gb(3)">← Atrás</button>
+        <button class="btn-next" onclick="gn(3)">Continuar →</button>
+      </div>
+    </div>
+
+    <!-- ══ STEP 4 — Preguntas abiertas + Confirmación ══ -->
+    <div class="step" id="step4">
+      <div class="field">
+        <label>Si tuviera que señalar un punto de fricción en nuestro proceso actual, ¿cuál sería?</label>
+        <textarea id="friccion" placeholder="Ej. Los tiempos de entrega de materiales podrían ser más ágiles…"></textarea>
+        <div class="err" id="friccionErr">⚠️ Por favor completa este campo.</div>
+      </div>
+      <div class="field">
+        <label>¿Qué aspecto positivo de nuestra colaboración considera que debemos mantener como parte de nuestro trabajo?</label>
+        <textarea id="positivo" placeholder="Ej. La proactividad del equipo y la calidad de los informes de resultados…"></textarea>
+        <div class="err" id="positivoErr">⚠️ Por favor completa este campo.</div>
+      </div>
+
+      <div class="divider"></div>
+      <p style="font-size:.75rem;color:var(--g500);margin-bottom:13px;font-weight:400;">Revisa tu evaluación antes de enviar:</p>
+      <div class="res-box" id="resBx"></div>
+      <div class="loader" id="loaderDiv"><div class="spinner"></div><span>Enviando…</span></div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="gb(4)">← Atrás</button>
+        <button class="btn-next" id="submitBtn" onclick="submitForm()">✓ Enviar evaluación</button>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success" id="successDiv">
+      <div class="s-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <div class="s-title">¡Gracias por evaluar!</div>
+      <p class="s-sub">Tu opinión fue registrada exitosamente.<br>Con tu feedback seguimos mejorando la experiencia Samplia.</p>
+
+    </div>
+  </div>
+
+</section>
+
+<script>
+  // ── DATA ──
+  const SERVICIO_ROWS = [
+    { key: 's_creatividad', label: 'Aporte de valor y creatividad en la propuesta.' },
+    { key: 's_respuesta',   label: 'Capacidad de respuesta y comunicación oportuna.' },
+    { key: 's_fluidez',     label: 'Fluidez y claridad en la gestión del proyecto.' },
+    { key: 's_plazos',      label: 'Cumplimiento de los plazos y compromisos acordados.' },
+    { key: 's_materiales',  label: 'Calidad de los materiales de producción.' },
+    { key: 's_informe',     label: 'Aporte de valor en la presentación del informe de resultados de la encuesta a consumidores.' },
+  ];
+  const SERVICIO_COLS = ['Deficiente','Pobre','Aceptable','Bueno','Excelente','No aplica'];
+
+  const IMPACTO_ROWS = [
+    { key: 'i_visibilidad', label: 'Visibilidad de la marca.' },
+    { key: 'i_conexion',    label: 'Conexión y respuesta del público.' },
+    { key: 'i_innovacion',  label: 'Percepción de innovación/calidad.' },
+    { key: 'i_ventas',      label: 'Impacto en las ventas del producto.' },
+  ];
+  const IMPACTO_COLS = ['Nulo','Bajo','Moderado','Alto','Excepcional'];
+
+  // ── STATE ──
+  const answers = {};
+  let satVal = null, npsVal = null;
+  let webhookUrl = localStorage.getItem('smp_url') || '';
+
+  // ── BUILD MATRIX ──
+  function buildMatrix(tbodyId, rows, cols) {
+    const tbody = document.getElementById(tbodyId);
+    rows.forEach(row => {
+      const tr = document.createElement('tr');
+      const tdLabel = document.createElement('td');
+      tdLabel.textContent = row.label;
+      tr.appendChild(tdLabel);
+      cols.forEach((col, ci) => {
+        const td = document.createElement('td');
+        const circle = document.createElement('div');
+        circle.className = 'radio-circle';
+        circle.dataset.key = row.key;
+        circle.dataset.val = col;
+        circle.addEventListener('click', () => {
+          // uncheck same row
+          document.querySelectorAll(`.radio-circle[data-key="${row.key}"]`).forEach(c => c.classList.remove('checked'));
+          circle.classList.add('checked');
+          answers[row.key] = col;
+          // hide error if all filled
+          const errId = tbodyId.replace('Body','') + 'Err';
+          document.getElementById(errId).style.display = 'none';
+        });
+        td.appendChild(circle);
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ── SLIDER EMOJIS ──
+  const SAT_EMOJIS  = { 1:'😞', 2:'😟', 3:'😕', 4:'😐', 5:'🙂', 6:'😊', 7:'😄', 8:'😁', 9:'🤩', 10:'🥳' };
+  const NPS_EMOJIS  = { 0:'😞', 1:'😟', 2:'😕', 3:'😐', 4:'🙂', 5:'😊', 6:'😄', 7:'😁', 8:'🤩', 9:'🥳', 10:'🥳' };
+
+  function activateSlider(type) {
+    const btn    = document.getElementById(type + 'StartBtn');
+    const slider = document.getElementById(type + 'Slider');
+    btn.classList.add('hidden');
+    slider.style.display = 'block';
+    slider.value = slider.max; // default to 10
+    if (type === 'sat') onSat(slider.value);
+    else                onNps(slider.value);
+  }
+
+  function onSat(val) {
+    val = parseInt(val);
+    satVal = val;
+    const pct = ((val - 1) / 9) * 100;
+    document.getElementById('satFill').style.width = pct + '%';
+    document.getElementById('satDisplay').innerHTML = val + '<span>/10</span>';
+    document.getElementById('satEmoji').textContent = SAT_EMOJIS[val] || '🤔';
+    document.getElementById('satErr').style.display = 'none';
+  }
+
+  function onNps(val) {
+    val = parseInt(val);
+    npsVal = val;
+    const pct = (val / 10) * 100;
+    document.getElementById('npsFill').style.width = pct + '%';
+    document.getElementById('npsDisplay').innerHTML = val + '<span>/10</span>';
+    document.getElementById('npsEmoji').textContent = NPS_EMOJIS[val] || '🤔';
+    document.getElementById('npsErr').style.display = 'none';
+  }
+
+  // ── PROGRESS ──
+  function prog(n) {
+    const p = Math.round(((n - 1) / 4) * 100);
+    document.getElementById('pFill').style.width = p + '%';
+    document.getElementById('pct').textContent = p + '%';
+    document.getElementById('stepLbl').textContent = 'Paso ' + n + ' de 4';
+  }
+
+  // ── NAVIGATION ──
+  function showS(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+    prog(n);
+    document.getElementById('form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function gb(f) { showS(f - 1); }
+  function gn(f) { if (!validate(f)) return; if (f === 3) mkRes(); showS(f + 1); }
+
+  // ── VALIDATION ──
+  function validate(s) {
+    let ok = true;
+    if (s === 1) {
+      if (!v('nombre'))  { sh('nombreErr');  ok = false; }
+      if (!v('empresa')) { sh('empresaErr'); ok = false; }
+      if (!v('proyecto')){ sh('proyectoErr');ok = false; }
+      if (satVal === null){ sh('satErr');    ok = false; }
+    }
+    if (s === 2) {
+      const allFilled = SERVICIO_ROWS.every(r => answers[r.key]);
+      if (!allFilled) { sh('matrizServicioErr'); ok = false; }
+    }
+    if (s === 3) {
+      const allFilled = IMPACTO_ROWS.every(r => answers[r.key]);
+      if (!allFilled) { sh('matrizImpactoErr'); ok = false; }
+      if (npsVal === null) { sh('npsErr'); ok = false; }
+    }
+    if (s === 4) {
+      if (!v('friccion')) { sh('friccionErr'); ok = false; }
+      if (!v('positivo')) { sh('positivoErr'); ok = false; }
+    }
+    return ok;
+  }
+  function v(id) { return document.getElementById(id).value.trim() !== ''; }
+  function sh(id) { document.getElementById(id).style.display = 'block'; }
+
+  // ── RESUMEN ──
+  function mkRes() {
+    const rows = [
+      ['__sec', 'Identificación'],
+      ['Nombre y apellido',      document.getElementById('nombre').value],
+      ['Organización/Empresa',   document.getElementById('empresa').value],
+      ['Proyecto/Campaña',       document.getElementById('proyecto').value],
+      ['Satisfacción general',   satVal + ' / 10'],
+      ['__sec', 'Evaluación del servicio'],
+      ...SERVICIO_ROWS.map(r => [r.label.replace(/\.$/, ''), answers[r.key] + '/5']),
+      ['__sec', 'Impacto en negocio'],
+      ...IMPACTO_ROWS.map(r => [r.label.replace(/\.$/, ''), answers[r.key]]),
+      ['__sec', 'Recomendación y comentarios'],
+      ['NPS',              npsVal + ' / 10'],
+      ['Punto de fricción', document.getElementById('friccion').value],
+      ['Aspecto positivo',  document.getElementById('positivo').value],
+    ];
+    document.getElementById('resBx').innerHTML = rows.map(([k, v]) =>
+      k === '__sec'
+        ? `<span class="res-section">${v}</span>`
+        : `<div class="res-row"><span class="res-k">${k}</span><span class="res-v">${v}</span></div>`
+    ).join('');
+  }
+
+  // ── SUBMIT ──
+  async function submitForm() {
+    if (!validate(4)) return;
+    const payload = {
+      nombre:       document.getElementById('nombre').value,
+      empresa:      document.getElementById('empresa').value,
+      proyecto:     document.getElementById('proyecto').value,
+      satisfaccion: satVal,
+      nps:          npsVal,
+      friccion:     document.getElementById('friccion').value,
+      positivo:     document.getElementById('positivo').value,
+      ...answers,
+    };
+    if (webhookUrl) {
+      document.getElementById('loaderDiv').style.display = 'flex';
+      document.getElementById('submitBtn').disabled = true;
+      try {
+        await fetch(webhookUrl, {
+          method: 'POST', mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      } catch (e) { console.warn('Sheets error:', e); }
+      document.getElementById('loaderDiv').style.display = 'none';
+    }
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('pFill').style.width = '100%';
+    document.getElementById('pct').textContent = '100%';
+    document.getElementById('stepLbl').textContent = '¡Completado!';
+    document.getElementById('successDiv').style.display = 'block';
+    document.getElementById('form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── RESET ──
+  function resetForm() {
+    satVal = null; npsVal = null;
+    Object.keys(answers).forEach(k => delete answers[k]);
+    ['nombre','empresa','proyecto','friccion','positivo'].forEach(id => document.getElementById(id).value = '');
+    document.querySelectorAll('.radio-circle').forEach(c => c.classList.remove('checked'));
+    // reset sliders
+    ['sat','nps'].forEach(type => {
+      document.getElementById(type + 'Slider').style.display = 'none';
+      document.getElementById(type + 'StartBtn').classList.remove('hidden');
+      document.getElementById(type + 'Fill').style.width = '0%';
+      document.getElementById(type + 'Display').innerHTML = '—<span>/10</span>';
+      document.getElementById(type + 'Emoji').textContent = '🤔';
+      document.getElementById(type + 'Slider').value = 5;
+    });
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('successDiv').style.display = 'none';
+    showS(1);
+  }
+
+  // ── INIT ──
+  buildMatrix('matrizServicioBody', SERVICIO_ROWS, SERVICIO_COLS);
+  buildMatrix('matrizImpactoBody',  IMPACTO_ROWS,  IMPACTO_COLS);
+  prog(1);
+  if (webhookUrl) {
+    document.getElementById('sheetUrl').value = webhookUrl;
+    document.getElementById('connPill').style.display = 'inline-flex';
+  }
+  // clear errors on input
+  ['nombre','empresa','proyecto','friccion','positivo'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      document.getElementById(id + 'Err').style.display = 'none';
+    });
+  });
+</script>
+</body>
+</html>
