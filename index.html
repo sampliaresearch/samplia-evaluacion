@@ -10,8 +10,8 @@
 
     :root {
       --red:       #E8192C;
-      --red-dark:  #cb4a5f;
-      --red-pale:  #f1d8de;
+      --red-dark:  #C4101F;
+      --red-pale:  #FFF0F1;
       --white:     #FFFFFF;
       --off-white: #FAFAFA;
       --g50:       #F5F5F5;
@@ -134,7 +134,7 @@
     .field textarea { height: 90px; line-height: 1.6; }
 
     .err { font-size: .7rem; color: var(--red); margin-top: 5px; display: none; font-weight: 500; }
-    .hint { font-size: .7rem; color: var(--g300); margin-top: 5px; font-weight: 400; }
+    .hint { font-size: .7rem; color: var(--red); margin-top: 5px; font-weight: 500; }
 
     .divider { height: 1px; background: var(--g100); margin: 22px 0; }
     .matrix-wrap { overflow-x: auto; }
@@ -404,12 +404,12 @@
           <thead>
             <tr>
               <th></th>
+              <th>No aplica</th>
               <th>Deficiente</th>
               <th>Pobre</th>
               <th>Aceptable</th>
               <th>Bueno</th>
               <th>Excelente</th>
-              <th>No aplica</th>
             </tr>
           </thead>
           <tbody id="matrizServicioBody"></tbody>
@@ -426,7 +426,7 @@
     <!-- ══ STEP 3 — Impacto en negocio (matrix) + NPS + Fricción ══ -->
     <div class="step" id="step3">
       <div class="q-label">
-        ¿En qué medida considera que la(s) activación(es) con Samplia ha(n) impactado en el posicionamiento o los objetivos de negocio de su marca?
+        ¿En qué medida considera que las activaciones con Samplia han impactado en el posicionamiento o los objetivos de negocio de su marca?
       </div>
       <div class="hint" style="margin-bottom:14px;">Selecciona el nivel de impacto para cada dimensión</div>
       <div class="matrix-wrap">
@@ -505,8 +505,8 @@
     <!-- SUCCESS -->
     <div class="success" id="successDiv">
       <div class="s-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></div>
-      <div class="s-title">¡Gracias por evaluar!</div>
-      <p class="s-sub">Tu opinión fue registrada exitosamente.<br>Con tu feedback seguimos mejorando la experiencia Samplia.</p>
+      <div class="s-title">¡Gracias por evaluar nuestro servicio!</div>
+      <p class="s-sub">Tu opinión fue registrada exitosamente.<br>Con tu feedback seguimos mejorando<br>la experiencia Samplia.</p>
 
     </div>
   </div>
@@ -523,7 +523,7 @@
     { key: 's_materiales',  label: 'Calidad de los materiales de producción.' },
     { key: 's_informe',     label: 'Aporte de valor en la presentación del informe de resultados de la encuesta a consumidores.' },
   ];
-  const SERVICIO_COLS = ['Deficiente','Pobre','Aceptable','Bueno','Excelente','No aplica'];
+  const SERVICIO_COLS = ['No aplica','Deficiente','Pobre','Aceptable','Bueno','Excelente'];
 
   const IMPACTO_ROWS = [
     { key: 'i_visibilidad', label: 'Visibilidad de la marca.' },
