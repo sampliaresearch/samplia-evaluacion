@@ -201,8 +201,9 @@
     .imp-gauges { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
     .imp-gauge-item { text-align:center; }
     .imp-gauge-label { font-size:.72rem; font-weight:600; color:var(--g700); margin-bottom:8px; }
-    .imp-gauge-val { font-size:1.1rem; font-weight:800; color:var(--black); margin-top:-10px; }
-    .imp-gauge-sub { font-size:.62rem; color:var(--g500); }
+    .imp-gauge-val   { font-size:1.1rem; font-weight:800; color:var(--black); margin-top:-10px; }
+    .imp-gauge-score { font-size:.72rem; font-weight:600; color:var(--g500); margin-top:2px; }
+    .imp-gauge-sub   { font-size:.62rem; color:var(--g500); margin-top:2px; }
 
     /* ── COMMENTS ── */
     .comments-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:22px; }
@@ -476,9 +477,9 @@ function out(data) {
       <div class="charts-2col">
         <div class="chart-card">
           <div class="chart-head">
-            <div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
               <div class="chart-title">Aspectos del servicio</div>
-              <div class="chart-sub">Sentimiento negativo ← / → positivo. "No aplica" excluido.</div>
+              <div class="chart-sub" style="margin-top:0;">Sentimiento negativo ← / → positivo</div>
             </div>
             <div class="chart-pill" id="svcPill">— / 5</div>
           </div>
@@ -896,6 +897,7 @@ function renderImpacto() {
       <div class="imp-gauge-label">${label}</div>
       <canvas id="${id}" width="160" height="90"></canvas>
       <div class="imp-gauge-val" id="${id}_val">—</div>
+      <div class="imp-gauge-score" id="${id}_score">— / 4</div>
       <div class="imp-gauge-sub" id="${id}_sub">— respuestas</div>`;
     wrap.appendChild(div);
 
@@ -933,12 +935,17 @@ function drawGauge(id, pct, avg, n) {
   ctx.beginPath(); ctx.arc(dotX,dotY,2.5,0,Math.PI*2);
   ctx.fillStyle='white'; ctx.fill();
 
-  const valEl = document.getElementById(id+'_val');
-  const subEl = document.getElementById(id+'_sub');
+  const valEl   = document.getElementById(id+'_val');
+  const scoreEl = document.getElementById(id+'_score');
+  const subEl   = document.getElementById(id+'_sub');
   if(valEl) {
     const lvl = ['Nulo','Bajo','Moderado','Alto','Excepcional'];
     valEl.textContent = n ? lvl[Math.round(avg)] || '—' : '—';
     valEl.style.color = color;
+  }
+  if(scoreEl) {
+    scoreEl.textContent = n ? avg.toFixed(2)+' / 4' : '— / 4';
+    scoreEl.style.color = '#78787E';
   }
   if(subEl) subEl.textContent = n+' respuestas';
 }
@@ -1015,19 +1022,44 @@ function fmtDate(s) {
 }
 
 // ── PDF EXPORT ──
-function exportPDF() {
-  const camp = document.getElementById('campFilter').value || 'Todas las campañas';
+async function exportPDF() {
+  const camp  = document.getElementById('campFilter').value || 'Todas las campañas';
   const fecha = new Date().toLocaleDateString('es-ES');
+
+  // Clone the content element
+  const original = document.getElementById('pdfContent');
+  const clone    = original.cloneNode(true);
+
+  // Replace every <canvas> in the clone with a static <img> from the original
+  const origCanvases  = original.querySelectorAll('canvas');
+  const cloneCanvases = clone.querySelectorAll('canvas');
+  origCanvases.forEach((c, i) => {
+    try {
+      const img = document.createElement('img');
+      img.src   = c.toDataURL('image/png', 1.0);
+      img.style.cssText = `width:${c.offsetWidth}px;height:${c.offsetHeight}px;display:block;`;
+      cloneCanvases[i].replaceWith(img);
+    } catch(e) { /* skip if tainted */ }
+  });
+
+  // Temporarily attach clone off-screen
+  clone.style.cssText = 'position:fixed;top:0;left:0;width:1200px;background:white;z-index:-9999;padding:28px;';
+  document.body.appendChild(clone);
+
   const opt = {
-    margin: [10,10,10,10],
-    filename: `Samplia_Insights_${camp.replace(/\s/g,'_')}_${fecha}.pdf`,
-    image: { type:'jpeg', quality:0.97 },
-    html2canvas: { scale:2, useCORS:true, logging:false },
-    jsPDF: { unit:'mm', format:'a4', orientation:'landscape' },
-    pagebreak: { mode:['avoid-all','css','legacy'] }
+    margin:    [8, 8, 8, 8],
+    filename:  `Samplia_Insights_${camp.replace(/\s/g,'_')}_${fecha}.pdf`,
+    image:     { type:'jpeg', quality:0.98 },
+    html2canvas:{ scale:1.5, useCORS:true, logging:false, allowTaint:true },
+    jsPDF:     { unit:'mm', format:'a3', orientation:'landscape' },
+    pagebreak: { mode:['css','legacy'] }
   };
-  const el = document.getElementById('pdfContent');
-  html2pdf().set(opt).from(el).save();
+
+  try {
+    await html2pdf().set(opt).from(clone).save();
+  } finally {
+    document.body.removeChild(clone);
+  }
 }
 
 // ── INIT ──
