@@ -47,9 +47,9 @@
       border-bottom:1px solid var(--g200);
     }
 
-    .sidebar-logo img { height:22px; width:auto; display:block; }
+    .sidebar-logo img { height:25px; width:auto; display:block; }
     .sidebar-logo-fallback { font-weight:800; font-size:1rem; color:var(--red); letter-spacing:-.02em; }
-    .sidebar-subtitle { font-size:.6rem; font-weight:600; color:var(--g300); letter-spacing:.1em; text-transform:uppercase; margin-top:7px; }
+    .sidebar-subtitle { font-size:.52rem; font-weight:600; color:var(--g300); letter-spacing:.06em; text-transform:uppercase; margin-top:7px; white-space:nowrap; }
 
     .sidebar-section-label {
       font-size:.58rem; font-weight:700; letter-spacing:.12em;
@@ -201,9 +201,8 @@
     .imp-gauges { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
     .imp-gauge-item { text-align:center; }
     .imp-gauge-label { font-size:.72rem; font-weight:600; color:var(--g700); margin-bottom:8px; }
-    .imp-gauge-val   { font-size:1.1rem; font-weight:800; color:var(--black); margin-top:-10px; }
-    .imp-gauge-score { font-size:.72rem; font-weight:600; color:var(--g500); margin-top:2px; }
-    .imp-gauge-sub   { font-size:.62rem; color:var(--g500); margin-top:2px; }
+    .imp-gauge-val { font-size:.75rem; font-weight:700; color:var(--black); margin-top:2px; }
+    .imp-gauge-sub { display:none; }
 
     /* ── COMMENTS ── */
     .comments-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:22px; }
@@ -418,9 +417,9 @@ function out(data) {
             <div class="mg-pr" style="flex:1"></div>
           </div>
           <div class="nps-bd">
-            <div class="nps-bi"><div class="nps-dot" style="background:var(--red)"></div><span id="npsD">—</span>&nbsp;Det.</div>
-            <div class="nps-bi"><div class="nps-dot" style="background:var(--amber)"></div><span id="npsP">—</span>&nbsp;Pas.</div>
-            <div class="nps-bi"><div class="nps-dot" style="background:var(--green)"></div><span id="npsPr">—</span>&nbsp;Pro.</div>
+            <div class="nps-bi"><div class="nps-dot" style="background:var(--red)"></div><span id="npsD">—</span>&nbsp;Detractores</div>
+            <div class="nps-bi"><div class="nps-dot" style="background:var(--amber)"></div><span id="npsP">—</span>&nbsp;Pasivos</div>
+            <div class="nps-bi"><div class="nps-dot" style="background:var(--green)"></div><span id="npsPr">—</span>&nbsp;Promotores</div>
           </div>
         </div>
 
@@ -479,7 +478,11 @@ function out(data) {
           <div class="chart-head">
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
               <div class="chart-title">Aspectos del servicio</div>
-              <div class="chart-sub" style="margin-top:0;">Sentimiento negativo ← / → positivo</div>
+              <div class="chart-sub" style="margin-top:0;">
+                <span style="color:#C4101F;font-weight:600;">negativo ←</span>
+                <span style="color:var(--g300);"> / </span>
+                <span style="color:#1D4ED8;font-weight:600;">→ positivo</span>
+              </div>
             </div>
             <div class="chart-pill" id="svcPill">— / 5</div>
           </div>
@@ -519,9 +522,9 @@ function out(data) {
                 <div class="sat-stat-bar" style="background:rgba(21,128,61,.1)"><div id="satSatBar" style="height:4px;border-radius:100px;background:#15803D;width:0%"></div></div>
               </div>
               <div class="sat-stat-item">
-                <div class="sat-stat-val" id="satNoSat" style="color:var(--amber)">—</div>
-                <div class="sat-stat-label" style="color:var(--amber)">No satisfecho</div>
-                <div class="sat-stat-bar" style="background:rgba(217,119,6,.1)"><div id="satNoSatBar" style="height:4px;border-radius:100px;background:var(--amber);width:0%"></div></div>
+                <div class="sat-stat-val" id="satNoSat" style="background:linear-gradient(90deg,#D97706,#E8192C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">—</div>
+                <div class="sat-stat-label" style="background:linear-gradient(90deg,#D97706,#E8192C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">No satisfecho</div>
+                <div class="sat-stat-bar" style="background:rgba(217,119,6,.1)"><div id="satNoSatBar" style="height:4px;border-radius:100px;background:linear-gradient(90deg,#D97706,#E8192C);width:0%"></div></div>
               </div>
             </div>
             <div class="sat-chart-wrap h-280"><canvas id="cSatDist"></canvas></div>
@@ -815,6 +818,7 @@ function renderServicio() {
       scales:{
         x:{
           stacked:true,
+          min:-100, max:100,
           grid:{color:'rgba(0,0,0,.04)'},
           ticks:{
             font:{family:'Poppins',size:10},color:'#78787E',
@@ -827,7 +831,47 @@ function renderServicio() {
           ticks:{font:{family:'Poppins',size:11},color:'#38383E'}
         }
       }
-    }
+    },
+    plugins:[{
+      id:'divergingLabels',
+      afterDatasetsDraw(chart) {
+        const {ctx, data} = chart;
+        // For each row, compute total negative and total positive then draw labels
+        const n = data.labels.length;
+        for(let ri=0; ri<n; ri++) {
+          let negSum=0, posSum=0;
+          data.datasets.forEach((ds,di) => {
+            const v = ds.data[ri] || 0;
+            if(v < 0) negSum += v; else posSum += v;
+          });
+          const meta0 = chart.getDatasetMeta(0);
+          if(!meta0.data[ri]) continue;
+          const y = meta0.data[ri].y;
+          const xScale = chart.scales.x;
+
+          if(negSum < -2) {
+            const xPx = xScale.getPixelForValue(negSum);
+            ctx.save();
+            ctx.font = '600 9px Poppins,sans-serif';
+            ctx.fillStyle = '#C4101F';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(Math.abs(negSum).toFixed(0)+'%', xPx-4, y);
+            ctx.restore();
+          }
+          if(posSum > 2) {
+            const xPx = xScale.getPixelForValue(posSum);
+            ctx.save();
+            ctx.font = '600 9px Poppins,sans-serif';
+            ctx.fillStyle = '#1D4ED8';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(posSum.toFixed(0)+'%', xPx+4, y);
+            ctx.restore();
+          }
+        }
+      }
+    }]
   });
 }
 
@@ -895,10 +939,8 @@ function renderImpacto() {
     div.className = 'imp-gauge-item';
     div.innerHTML = `
       <div class="imp-gauge-label">${label}</div>
-      <canvas id="${id}" width="160" height="90"></canvas>
-      <div class="imp-gauge-val" id="${id}_val">—</div>
-      <div class="imp-gauge-score" id="${id}_score">— / 4</div>
-      <div class="imp-gauge-sub" id="${id}_sub">— respuestas</div>`;
+      <canvas id="${id}" width="160" height="100"></canvas>
+      <div class="imp-gauge-val" id="${id}_val">—</div>`;
     wrap.appendChild(div);
 
     requestAnimationFrame(() => drawGauge(id, pct, avg, vals.length));
@@ -910,7 +952,7 @@ function drawGauge(id, pct, avg, n) {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const W=canvas.width, H=canvas.height;
-  const cx=W/2, cy=H-10, r=62;
+  const cx=W/2, cy=H-14, r=58;
 
   ctx.clearRect(0,0,W,H);
 
@@ -928,26 +970,37 @@ function drawGauge(id, pct, avg, n) {
   ctx.lineWidth=14; ctx.strokeStyle=color;
   ctx.lineCap='round'; ctx.stroke();
 
-  // Center dot
+  // Moving dot on arc tip
   const dotX = cx+Math.cos(endAngle)*r, dotY = cy+Math.sin(endAngle)*r;
   ctx.beginPath(); ctx.arc(dotX,dotY,5,0,Math.PI*2);
   ctx.fillStyle=color; ctx.fill();
   ctx.beginPath(); ctx.arc(dotX,dotY,2.5,0,Math.PI*2);
   ctx.fillStyle='white'; ctx.fill();
 
-  const valEl   = document.getElementById(id+'_val');
-  const scoreEl = document.getElementById(id+'_score');
-  const subEl   = document.getElementById(id+'_sub');
+  // Score inside arc (centered)
+  if(n) {
+    ctx.save();
+    ctx.font = '800 18px Poppins,sans-serif';
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(avg.toFixed(1), cx, cy - 14);
+    ctx.restore();
+    ctx.save();
+    ctx.font = '500 9px Poppins,sans-serif';
+    ctx.fillStyle = '#B0B0B6';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('/ 4', cx, cy - 1);
+    ctx.restore();
+  }
+
+  const valEl = document.getElementById(id+'_val');
   if(valEl) {
     const lvl = ['Nulo','Bajo','Moderado','Alto','Excepcional'];
     valEl.textContent = n ? lvl[Math.round(avg)] || '—' : '—';
     valEl.style.color = color;
   }
-  if(scoreEl) {
-    scoreEl.textContent = n ? avg.toFixed(2)+' / 4' : '— / 4';
-    scoreEl.style.color = '#78787E';
-  }
-  if(subEl) subEl.textContent = n+' respuestas';
 }
 
 // ── NPS DIST BAR ──
@@ -1022,44 +1075,19 @@ function fmtDate(s) {
 }
 
 // ── PDF EXPORT ──
-async function exportPDF() {
-  const camp  = document.getElementById('campFilter').value || 'Todas las campañas';
+function exportPDF() {
+  const camp = document.getElementById('campFilter').value || 'Todas las campañas';
   const fecha = new Date().toLocaleDateString('es-ES');
-
-  // Clone the content element
-  const original = document.getElementById('pdfContent');
-  const clone    = original.cloneNode(true);
-
-  // Replace every <canvas> in the clone with a static <img> from the original
-  const origCanvases  = original.querySelectorAll('canvas');
-  const cloneCanvases = clone.querySelectorAll('canvas');
-  origCanvases.forEach((c, i) => {
-    try {
-      const img = document.createElement('img');
-      img.src   = c.toDataURL('image/png', 1.0);
-      img.style.cssText = `width:${c.offsetWidth}px;height:${c.offsetHeight}px;display:block;`;
-      cloneCanvases[i].replaceWith(img);
-    } catch(e) { /* skip if tainted */ }
-  });
-
-  // Temporarily attach clone off-screen
-  clone.style.cssText = 'position:fixed;top:0;left:0;width:1200px;background:white;z-index:-9999;padding:28px;';
-  document.body.appendChild(clone);
-
   const opt = {
-    margin:    [8, 8, 8, 8],
-    filename:  `Samplia_Insights_${camp.replace(/\s/g,'_')}_${fecha}.pdf`,
-    image:     { type:'jpeg', quality:0.98 },
-    html2canvas:{ scale:1.5, useCORS:true, logging:false, allowTaint:true },
-    jsPDF:     { unit:'mm', format:'a3', orientation:'landscape' },
-    pagebreak: { mode:['css','legacy'] }
+    margin: [10,10,10,10],
+    filename: `Samplia_Insights_${camp.replace(/\s/g,'_')}_${fecha}.pdf`,
+    image: { type:'jpeg', quality:0.97 },
+    html2canvas: { scale:2, useCORS:true, logging:false },
+    jsPDF: { unit:'mm', format:'a4', orientation:'landscape' },
+    pagebreak: { mode:['avoid-all','css','legacy'] }
   };
-
-  try {
-    await html2pdf().set(opt).from(clone).save();
-  } finally {
-    document.body.removeChild(clone);
-  }
+  const el = document.getElementById('pdfContent');
+  html2pdf().set(opt).from(el).save();
 }
 
 // ── INIT ──
